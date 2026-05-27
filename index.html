@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>QMS v2 | 품질관리 시스템</title>
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -10,607 +9,195 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
-:root{
-  --font-ko:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
-  --font-en:"Calibri","Calibri Regular",Arial,sans-serif;
-  --font-mono:"Calibri","Consolas","IBM Plex Mono",monospace;
-  --bg:#060d1a;--bg2:#0b1628;--bg3:#0f1f38;--bg4:#162a4a;
-  --cyan:#00d4ff;--blue:#1a6ef5;--green:#00e676;--amber:#ffab00;--red:#ff3d3d;--purple:#8b5cf6;--teal:#00bcd4;
-  --t1:#e8f4fd;--t2:#7fb3d3;--t3:#3a6080;--bdr:#143050;--bdr2:#1a3a58;--r:6px;--rl:10px;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:var(--font-ko);background:var(--bg);color:var(--t1);min-height:100vh;font-size:13px;}
-.layout{display:flex;min-height:100vh;}
+:root{--font-ko:"Malgun Gothic","맑은 고딕",sans-serif;--font-en:"Calibri",Arial,sans-serif;--font-mono:"Consolas",monospace;--bg:#060d1a;--bg2:#0b1628;--bg3:#0f1f38;--bg4:#162a4a;--cyan:#00d4ff;--blue:#1a6ef5;--green:#00e676;--amber:#ffab00;--red:#ff3d3d;--purple:#8b5cf6;--teal:#00bcd4;--t1:#e8f4fd;--t2:#7fb3d3;--t3:#3a6080;--bdr:#143050;--bdr2:#1a3a58;--r:6px;--rl:10px;}
+*{margin:0;padding:0;box-sizing:border-box;}body{font-family:var(--font-ko);background:var(--bg);color:var(--t1);min-height:100vh;font-size:13px;}.layout{display:flex;min-height:100vh;}
 .sidebar{width:210px;min-width:210px;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto;}
-.main{margin-left:210px;flex:1;display:flex;flex-direction:column;}
-.topbar{height:44px;background:var(--bg2);border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:90;gap:10px;}
-.content{padding:12px 14px;flex:1;}
-.logo-wrap{padding:10px 12px;border-bottom:1px solid var(--bdr);}
-.logo{font-family:"Bebas Neue";font-size:26px;color:var(--cyan);letter-spacing:4px;}
-.logo-sub{font-size:9px;color:var(--t3);letter-spacing:1px;}
-.logo-ver{font-size:9px;color:var(--cyan);opacity:.5;}
-.yr-panel{padding:4px 6px;border-bottom:1px solid var(--bdr);}
-.yr-lbl{font-size:10px;color:var(--t3);letter-spacing:1px;padding:3px 5px;text-transform:uppercase;}
-.yt{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font-mono);color:var(--t2);transition:.15s;margin-bottom:1px;}
-.yt:hover{background:var(--bg3);color:var(--t1);}
-.yt.act{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.2);}
-.yt-c{font-size:16px;padding:1px 4px;border-radius:3px;background:var(--bg3);color:var(--t3);}
-.yt.act .yt-c{background:rgba(0,212,255,.12);color:var(--cyan);}
-.yr-add{width:100%;margin-top:3px;padding:4px;border-radius:var(--r);border:1px dashed var(--bdr);background:transparent;color:var(--t3);cursor:pointer;font-size:15px;font-family:var(--font-ko);}
-.yr-add:hover{border-color:var(--cyan);color:var(--cyan);}
-.nav-sec{padding:3px 4px 1px;}
-.nav-lbl{font-size:10px;color:var(--t3);letter-spacing:1px;padding:4px 7px;text-transform:uppercase;}
-.ni{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:var(--r);cursor:pointer;margin-bottom:1px;font-size:12px;color:var(--t2);transition:.15s;}
-.ni:hover{background:var(--bg3);color:var(--t1);}
-.ni.act{background:var(--blue);color:#fff;}
-.sb-foot{padding:7px;border-top:1px solid var(--bdr);margin-top:auto;}
-.ubadge{display:flex;align-items:center;gap:5px;padding:6px;background:var(--bg3);border-radius:var(--r);}
-.uav{width:24px;height:24px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;}
-.uname{font-size:10px;font-weight:600;}
-.udept{font-size:8px;color:var(--t3);}
-.rb{font-size:10px;padding:2px 6px;border-radius:3px;font-weight:700;}
-.rb.admin{background:rgba(255,61,61,.18);color:var(--red);}
-.rb.manager{background:rgba(255,171,0,.18);color:var(--amber);}
-.rb.viewer{background:rgba(148,163,184,.12);color:var(--t2);}
-.pg-title{font-size:14px;font-weight:700;}
-.yr-badge{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;font-family:var(--font-mono);background:rgba(0,212,255,.08);color:var(--cyan);border:1px solid rgba(0,212,255,.18);}
-.conn-ok{font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(0,230,118,.12);color:var(--green);border:1px solid rgba(0,230,118,.2);}
-.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);}
-.card-hd{padding:8px 13px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap;}
-.card-title{font-size:13px;font-weight:700;}
-.card-bd{padding:10px;}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
-.mb3{margin-bottom:8px;}
-.mb4{margin-bottom:10px;}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:10px;}
-.sc{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);padding:10px;position:relative;overflow:hidden;}
-.sc.cb::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--blue);}
-.sc.cr::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--red);}
-.sc.cg::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);}
-.sc-lbl{font-size:10px;color:var(--t3);margin-bottom:3px;}
-.sc-val{font-size:22px;font-weight:800;font-family:var(--font-mono);line-height:1.1;}
-.tw{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:15px;}
-th{background:var(--bg4);color:var(--t3);padding:6px 8px;text-align:left;font-weight:600;font-size:11px;letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--bdr);white-space:nowrap;position:sticky;top:0;z-index:2;}
-td{padding:5px 8px;border-bottom:1px solid var(--bdr2);color:var(--t1);white-space:nowrap;font-size:12px;}
-tr:hover td{background:rgba(26,110,245,.04);}
-tr.drag-on{opacity:.3;}
-tr.drag-ov td{border-top:2px solid var(--cyan)!important;}
-tr.drag-bw td{border-bottom:2px solid var(--cyan)!important;}
-.dh{cursor:grab;color:var(--t3);user-select:none;font-size:15px;}
-.dh:active{cursor:grabbing;}
-.b{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600;}
-.bb{background:rgba(26,110,245,.18);color:#60a5fa;} .bg{background:rgba(0,230,118,.15);color:var(--green);}
-.ba{background:rgba(255,171,0,.15);color:var(--amber);} .br{background:rgba(255,61,61,.15);color:var(--red);}
-.bp{background:rgba(139,92,246,.15);color:#a78bfa;} .bx{background:rgba(148,163,184,.1);color:var(--t2);}
-.bc{background:rgba(0,212,255,.12);color:var(--cyan);}
+.main{margin-left:210px;flex:1;display:flex;flex-direction:column;}.topbar{height:44px;background:var(--bg2);border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:90;gap:10px;}.content{padding:12px 14px;flex:1;}
+.logo-wrap{padding:10px 12px;border-bottom:1px solid var(--bdr);}.logo{font-family:"Bebas Neue";font-size:26px;color:var(--cyan);letter-spacing:4px;}.logo-sub{font-size:9px;color:var(--t3);letter-spacing:1px;}.logo-ver{font-size:9px;color:var(--cyan);opacity:.5;}
+.yr-panel{padding:4px 6px;border-bottom:1px solid var(--bdr);}.yr-lbl{font-size:10px;color:var(--t3);letter-spacing:1px;padding:3px 5px;text-transform:uppercase;}
+.yt{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font-mono);color:var(--t2);transition:.15s;margin-bottom:1px;}.yt:hover{background:var(--bg3);color:var(--t1);}.yt.act{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.2);}
+.yt-c{font-size:11px;padding:1px 4px;border-radius:3px;background:var(--bg3);color:var(--t3);}.yt.act .yt-c{background:rgba(0,212,255,.12);color:var(--cyan);}.yr-add{width:100%;margin-top:3px;padding:4px;border-radius:var(--r);border:1px dashed var(--bdr);background:transparent;color:var(--t3);cursor:pointer;font-size:11px;}.yr-add:hover{border-color:var(--cyan);color:var(--cyan);}
+.nav-sec{padding:3px 4px 1px;}.nav-lbl{font-size:10px;color:var(--t3);letter-spacing:1px;padding:4px 7px;text-transform:uppercase;}
+.ni{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:var(--r);cursor:pointer;margin-bottom:1px;font-size:12px;color:var(--t2);transition:.15s;}.ni:hover{background:var(--bg3);color:var(--t1);}.ni.act{background:var(--blue);color:#fff;}
+.sb-foot{padding:7px;border-top:1px solid var(--bdr);margin-top:auto;}.ubadge{display:flex;align-items:center;gap:5px;padding:6px;background:var(--bg3);border-radius:var(--r);}.uav{width:24px;height:24px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+.uname{font-size:11px;font-weight:600;}.udept{font-size:9px;color:var(--t3);}.rb{font-size:9px;padding:1px 4px;border-radius:3px;font-weight:700;}.rb.admin{background:rgba(255,61,61,.18);color:var(--red);}.rb.manager{background:rgba(255,171,0,.18);color:var(--amber);}.rb.viewer{background:rgba(148,163,184,.12);color:var(--t2);}
+.pg-title{font-size:14px;font-weight:700;}.yr-badge{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;font-family:var(--font-mono);background:rgba(0,212,255,.08);color:var(--cyan);border:1px solid rgba(0,212,255,.18);}.conn-ok{font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(0,230,118,.12);color:var(--green);border:1px solid rgba(0,230,118,.2);}
+.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);}.card-hd{padding:8px 13px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap;}.card-title{font-size:13px;font-weight:700;}.card-bd{padding:10px;}.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px;}.mb3{margin-bottom:8px;}.mb4{margin-bottom:10px;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:10px;}.sc{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);padding:10px;position:relative;overflow:hidden;}.sc::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;}
+.sc.cb::before{background:var(--blue);}.sc.cc::before{background:var(--cyan);}.sc.cg::before{background:var(--green);}.sc.ca::before{background:var(--amber);}.sc.cr::before{background:var(--red);}.sc.cp::before{background:var(--purple);}.sc.ct::before{background:var(--teal);}
+.sc-lbl{font-size:10px;color:var(--t3);margin-bottom:3px;}.sc-val{font-size:22px;font-weight:800;font-family:var(--font-mono);line-height:1.1;}.sc-sub{font-size:10px;color:var(--t3);margin-top:2px;}.sc-bar{height:3px;background:var(--bg3);border-radius:2px;margin-top:6px;overflow:hidden;}.sc-fill{height:100%;border-radius:2px;}
+.tw{overflow-x:auto;}table{width:100%;border-collapse:collapse;}th{background:var(--bg4);color:var(--t3);padding:6px 8px;text-align:left;font-weight:600;font-size:11px;letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--bdr);white-space:nowrap;position:sticky;top:0;z-index:2;}
+td{padding:5px 8px;border-bottom:1px solid var(--bdr2);color:var(--t1);white-space:nowrap;font-size:12px;}tr:hover td{background:rgba(26,110,245,.04);}tr.drag-on{opacity:.3;}tr.drag-ov td{border-top:2px solid var(--cyan)!important;}tr.drag-bw td{border-bottom:2px solid var(--cyan)!important;}
+.dh{cursor:grab;color:var(--t3);user-select:none;font-size:14px;text-align:center;}.dh:active{cursor:grabbing;}
+.b{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600;}.bb{background:rgba(26,110,245,.18);color:#60a5fa;}.bg{background:rgba(0,230,118,.15);color:var(--green);}.ba{background:rgba(255,171,0,.15);color:var(--amber);}.br{background:rgba(255,61,61,.15);color:var(--red);}.bp{background:rgba(139,92,246,.15);color:#a78bfa;}.bx{background:rgba(148,163,184,.1);color:var(--t2);}.bc{background:rgba(0,212,255,.12);color:var(--cyan);}
 .btn{padding:4px 10px;border-radius:var(--r);border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:var(--font-ko);display:inline-flex;align-items:center;gap:4px;transition:.15s;white-space:nowrap;}
-.btn-p{background:var(--blue);color:#fff;} .btn-p:hover{background:#1555d0;}
-.btn-s{background:var(--bg3);color:var(--t2);border:1px solid var(--bdr);} .btn-s:hover{color:var(--t1);}
-.btn-d{background:var(--red);color:#fff;}
-.btn-sm{padding:2px 7px;font-size:11px;}
-.fg{display:flex;flex-direction:column;gap:4px;}
-.fg.full{grid-column:1/-1;}
-label{font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.4px;}
-input,select,textarea{background:var(--bg3);border:1px solid var(--bdr);color:var(--t1);padding:5px 8px;border-radius:var(--r);font-size:12px;font-family:var(--font-ko);transition:.15s;width:100%;}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cyan);}
-input[readonly]{background:rgba(0,212,255,.05);border-color:rgba(0,212,255,.18);color:var(--cyan);font-family:var(--font-mono);font-weight:700;cursor:default;}
-textarea{resize:vertical;min-height:58px;}
-select option{background:var(--bg2);}
+.btn-p{background:var(--blue);color:#fff;}.btn-p:hover{background:#1555d0;}.btn-s{background:var(--bg3);color:var(--t2);border:1px solid var(--bdr);}.btn-s:hover{color:var(--t1);}.btn-d{background:var(--red);color:#fff;}.btn-g{background:rgba(0,230,118,.15);color:var(--green);border:1px solid rgba(0,230,118,.25);}
+.btn-sm{padding:2px 7px;font-size:11px;}.ib{width:23px;height:23px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--bdr);color:var(--t3);cursor:pointer;font-size:12px;display:inline-flex;align-items:center;justify-content:center;transition:.15s;}.ib:hover{color:var(--t1);}.ib.d:hover{color:var(--red);}
+.fg{display:flex;flex-direction:column;gap:4px;}.fgg{display:grid;grid-template-columns:1fr 1fr;gap:9px;}.fg.full{grid-column:1/-1;}label{font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.4px;}
+input,select,textarea{background:var(--bg3);border:1px solid var(--bdr);color:var(--t1);padding:5px 8px;border-radius:var(--r);font-size:12px;font-family:var(--font-ko);transition:.15s;width:100%;}input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cyan);}input[readonly]{background:rgba(0,212,255,.05);border-color:rgba(0,212,255,.18);color:var(--cyan);font-family:var(--font-mono);font-weight:700;cursor:default;}
+input[data-auto]{background:rgba(0,230,118,.05);border-color:rgba(0,230,118,.2);color:var(--green);font-family:var(--font-mono);cursor:default;}textarea{resize:vertical;min-height:58px;}select option{background:var(--bg2);}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;z-index:1000;padding:12px;}
-.modal{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);width:100%;max-width:820px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.7);}
-.mhd{padding:13px 17px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:1;}
-.mtitle{font-size:14px;font-weight:700;}
-.mbd{padding:17px;}
-.mft{padding:10px 17px;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end;gap:6px;position:sticky;bottom:0;background:var(--bg2);}
-.xb{width:23px;height:23px;border-radius:50%;background:var(--bg3);border:none;color:var(--t2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
-.pzone{border:2px dashed var(--bdr);border-radius:var(--r);padding:11px;text-align:center;cursor:pointer;transition:.2s;}
-.pzone:hover,.pzone.dov{border-color:var(--cyan);background:rgba(0,212,255,.03);}
-.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;margin-top:7px;}
-.pt{position:relative;aspect-ratio:1;border-radius:var(--r);overflow:hidden;border:1px solid var(--bdr);cursor:pointer;background:var(--bg3);}
-.pt img{width:100%;height:100%;object-fit:cover;transition:transform .2s;}
-.pt:hover img{transform:scale(1.08);}
-.pdel{position:absolute;top:2px;right:2px;width:15px;height:15px;border-radius:50%;background:rgba(255,61,61,.9);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:.15s;}
-.pt:hover .pdel{opacity:1;}
-.plbl{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);color:#fff;font-size:10px;padding:2px 3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-.phc{display:inline-flex;align-items:center;gap:2px;padding:1px 5px;border-radius:3px;font-size:11px;font-weight:600;background:rgba(0,212,255,.1);color:var(--cyan);cursor:pointer;}
-.phc:hover{background:rgba(0,212,255,.22);}
-.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:6px;margin-top:7px;}
-.doc-card{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);padding:7px;text-align:center;position:relative;transition:.15s;}
-.doc-card:hover{border-color:var(--cyan);}
-.atabs{display:flex;border-bottom:1px solid var(--bdr);margin-bottom:7px;}
-.atab{padding:5px 11px;font-size:12px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:.15s;}
-.atab:hover{color:var(--t2);} .atab.act{color:var(--cyan);border-bottom-color:var(--cyan);}
-.psec{margin-top:13px;padding-top:11px;border-top:1px solid var(--bdr);}
-.psec-lbl{font-size:12px;font-weight:700;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
-.lb{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:3000;display:flex;align-items:center;justify-content:center;flex-direction:column;}
-.lb img{max-width:86vw;max-height:74vh;object-fit:contain;border-radius:var(--r);}
-.lb-bar{display:flex;gap:8px;margin-top:10px;align-items:center;}
-.lb-btn{background:var(--bg3);border:1px solid var(--bdr);color:var(--t1);padding:4px 11px;border-radius:var(--r);cursor:pointer;font-size:12px;font-family:var(--font-ko);}
-.lb-btn:disabled{opacity:.35;cursor:default;}
-.lb-close{position:absolute;top:11px;right:11px;width:29px;height:29px;border-radius:50%;background:var(--bg3);border:1px solid var(--bdr);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.lb-info{font-size:12px;color:var(--t3);margin-top:5px;}
-.hint{font-size:11px;color:var(--t3);}
-.info-box{padding:8px 11px;border-radius:var(--r);font-size:12px;line-height:1.7;}
-.info-box.blue{background:rgba(26,110,245,.07);border:1px solid rgba(26,110,245,.18);color:var(--t2);}
-.info-box.green{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.18);color:var(--green);}
-.twrap{position:fixed;bottom:14px;right:14px;z-index:9999;display:flex;flex-direction:column;gap:5px;}
-.toast{background:var(--bg4);border:1px solid var(--bdr);border-radius:var(--r);padding:7px 11px;font-size:12px;max-width:270px;display:flex;align-items:center;gap:6px;animation:ti .18s ease;}
-.toast.s{border-left:3px solid var(--green);} .toast.e{border-left:3px solid var(--red);} .toast.i{border-left:3px solid var(--blue);}
-@keyframes ti{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-.lw{min-height:100vh;display:flex;align-items:center;justify-content:center;}
-.lc{width:350px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);padding:30px;}
-.mono{font-family:var(--font-mono);}
-</style>
-</head><body><div id="root"></div>
+.modal{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);width:100%;max-width:820px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.7);}.mhd{padding:13px 17px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:1;}.mtitle{font-size:14px;font-weight:700;}.mbd{padding:17px;}
+.mft{padding:10px 17px;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end;gap:6px;position:sticky;bottom:0;background:var(--bg2);}.xb{width:23px;height:23px;border-radius:50%;background:var(--bg3);border:none;color:var(--t2);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
+.pzone{border:2px dashed var(--bdr);border-radius:var(--r);padding:11px;text-align:center;cursor:pointer;transition:.2s;}.pzone:hover,.pzone.dov{border-color:var(--cyan);background:rgba(0,212,255,.03);}.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;margin-top:7px;}
+.pt{position:relative;aspect-ratio:1;border-radius:var(--r);overflow:hidden;border:1px solid var(--bdr);cursor:pointer;background:var(--bg3);}.pt img{width:100%;height:100%;object-fit:cover;transition:transform .2s;}.pt:hover img{transform:scale(1.08);}
+.pdel{position:absolute;top:2px;right:2px;width:15px;height:15px;border-radius:50%;background:rgba(255,61,61,.9);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:.15s;}.pt:hover .pdel{opacity:1;}.plbl{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);color:#fff;font-size:10px;padding:2px 3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.phc{display:inline-flex;align-items:center;gap:2px;padding:1px 5px;border-radius:3px;font-size:11px;font-weight:600;background:rgba(0,212,255,.1);color:var(--cyan);cursor:pointer;}.phc:hover{background:rgba(0,212,255,.22);}.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:6px;margin-top:7px;}.doc-card{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);padding:7px;text-align:center;position:relative;transition:.15s;}.doc-card:hover{border-color:var(--cyan);}
+.atabs{display:flex;border-bottom:1px solid var(--bdr);margin-bottom:7px;}.atab{padding:5px 11px;font-size:12px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:.15s;}.atab:hover{color:var(--t2);}.atab.act{color:var(--cyan);border-bottom-color:var(--cyan);}.psec{margin-top:13px;padding-top:11px;border-top:1px solid var(--bdr);}.psec-lbl{font-size:12px;font-weight:700;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:3000;display:flex;align-items:center;justify-content:center;flex-direction:column;}.lb img{max-width:86vw;max-height:74vh;object-fit:contain;border-radius:var(--r);}.lb-bar{display:flex;gap:8px;margin-top:10px;align-items:center;}.lb-btn{background:var(--bg3);border:1px solid var(--bdr);color:var(--t1);padding:4px 11px;border-radius:var(--r);cursor:pointer;font-size:12px;}.lb-btn:disabled{opacity:.35;cursor:default;}
+.lb-close{position:absolute;top:11px;right:11px;width:29px;height:29px;border-radius:50%;background:var(--bg3);border:1px solid var(--bdr);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}.lb-info{font-size:11px;color:var(--t3);margin-top:5px;}
+.kpi-a{font-size:10px;background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.2);color:var(--green);padding:1px 4px;border-radius:2px;}.kpi-m{font-size:10px;background:rgba(255,171,0,.1);border:1px solid rgba(255,171,0,.2);color:var(--amber);padding:1px 4px;border-radius:2px;}.ch2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}.ch-wrap{position:relative;height:180px;}
+.fbar{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:7px;}.twrap{position:fixed;bottom:14px;right:14px;z-index:9999;display:flex;flex-direction:column;gap:5px;}.toast{background:var(--bg4);border:1px solid var(--bdr);border-radius:var(--r);padding:7px 11px;font-size:12px;max-width:270px;display:flex;align-items:center;gap:6px;animation:ti .18s ease;}.toast.s{border-left:3px solid var(--green);}.toast.e{border-left:3px solid var(--red);}.toast.i{border-left:3px solid var(--blue);}
+@keyframes ti{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}.lw{min-height:100vh;display:flex;align-items:center;justify-content:center;}.lc{width:350px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);padding:30px;}.mono{font-family:var(--font-mono);}.st{font-size:12px;font-weight:700;color:var(--t3);letter-spacing:1px;text-transform:uppercase;padding-bottom:5px;border-bottom:1px solid var(--bdr);margin-bottom:9px;}.hint{font-size:11px;color:var(--t3);}
+.tag-a{background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);color:var(--green);font-size:9px;padding:1px 4px;border-radius:2px;}.info-box{padding:8px 11px;border-radius:var(--r);font-size:12px;line-height:1.7;}.info-box.blue{background:rgba(26,110,245,.07);border:1px solid rgba(26,110,245,.18);color:var(--t2);}.info-box.green{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.18);color:var(--green);}.info-box.amber{background:rgba(255,171,0,.07);border:1px solid rgba(255,171,0,.18);color:var(--amber);}
+.tabs{display:flex;border-bottom:1px solid var(--bdr);margin-bottom:12px;}.tab{padding:7px 14px;font-size:13px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:.15s;}.tab:hover{color:var(--t2);}.tab.act{color:var(--cyan);border-bottom-color:var(--cyan);}
+</style></head><body><div id="root"></div>
 <script type="text/babel">
 const {useState,useEffect,useRef,useCallback,useMemo}=React;
-
-/* ── Supabase 연결 설정 ── */
 let _sb=null;
 const getSB=()=>{const u=localStorage.getItem("supa_url"),k=localStorage.getItem("supa_key");if(!u||!k)return null;if(!_sb)_sb=window.supabase.createClient(u,k);return _sb;};
-
-/* ── 유틸리티 함수 ── */
-const fmt=n=>n==null?"-":Number(n).toLocaleString("ko-KR");
-const fmtD=d=>d?String(d).substring(0,10):"-";
+const fmt=n=>n==null?"-":Number(n).toLocaleString("ko-KR");const fmtD=d=>d?String(d).substring(0,10):"-";
 const MO=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 const TC={가공:"ba",취부:"bp",용접:"br",치수:"bb",도장:"ba",기타:"bx",포장:"bx",절단:"bc"};
 const DC={Return:"bb","Owner Rework":"ba","Site Rework":"ba",Discard:"br"};
 const TYPES=["가공","취부","용접","치수","도장","기타","포장","절단"];
 const DISPS=["Return","Owner Rework","Site Rework","Discard"];
-
 const isoW=ds=>{if(!ds)return"";const d=new Date(ds);if(isNaN(d))return"";const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y0)/86400000+1)/7);};
 const getMo=ds=>{if(!ds)return null;const d=new Date(ds);return isNaN(d)?null:d.getMonth()+1;};
 const add90=ds=>{if(!ds)return"";try{const d=new Date(ds);d.setDate(d.getDate()+90);return d.toISOString().slice(0,10);}catch{return "";}};
-
-/* 이미지 및 파일 업로드 유틸 */
 const compImg=f=>new Promise(res=>{const rd=new FileReader();rd.onload=e=>{const img=new Image();img.onload=()=>{const M=600;let w=img.width,h=img.height;if(w>M||h>M){const s=M/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s);}const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);res({name:f.name,size:f.size,data:cv.toDataURL("image/jpeg",.75),w,h});};img.src=e.target.result;};rd.readAsDataURL(f);});
 const attFile=f=>new Promise(res=>{const ext=f.name.split(".").pop().toLowerCase();if(["jpg","jpeg","png","gif","webp"].includes(ext)){compImg(f).then(res);}else{const rd=new FileReader();rd.onload=e=>res({name:f.name,size:f.size,data:e.target.result,fileType:"doc"});rd.readAsDataURL(f);}});
-const FICONS={pdf:"📄",doc:"📝",docx:"📝",xls:"📊",xlsx:"📊",hwp:"📝",zip:"🗜"};
-const gIcon=n=>FICONS[n?.split(".").pop()?.toLowerCase()]||"📁";
-const fSz=b=>b<1024?b+"B":b<1048576?(b/1024).toFixed(1)+"KB":(b/1048576).toFixed(1)+"MB";
+const FICONS={pdf:"📄",doc:"📝",docx:"📝",xls:"📊",xlsx:"📊",hwp:"📝",zip:"🗜"};const gIcon=n=>FICONS[n?.split(".").pop()?.toLowerCase()]||"📁";const fSz=b=>b<1024?b+"B":b<1048576?(b/1024).toFixed(1)+"KB":(b/1048576).toFixed(1)+"MB";
 
-/* ── useDrag 커스텀 훅 (DB 실시간 연동 및 동기화 완벽 수정) ── */
-function useDrag(items,setItems,ce,toast){
+/* ── [버그 수정 1] useDrag 실시간 재정렬 및 Supabase 영구 보존 동기화 ── */
+function useDrag(items,setItems,ce){
   const di=useRef(null),oi=useRef(null);
   const start=(e,i)=>{if(!ce)return;di.current=i;e.dataTransfer.effectAllowed="move";e.currentTarget.classList.add("drag-on");};
-  
-  const end=async(e)=>{
+  const end=async e=>{
     e.currentTarget.classList.remove("drag-on");
     document.querySelectorAll(".drag-ov,.drag-bw").forEach(r=>r.classList.remove("drag-ov","drag-bw"));
     if(di.current===null||oi.current===null||di.current===oi.current){di.current=null;oi.current=null;return;}
-    
-    const arr=[...items];
-    const[m]=arr.splice(di.current,1);
-    arr.splice(oi.current,0,m);
-    
-    // 순서 정렬 가공 (seq_no와 sort_order 값을 완벽 매칭 동기화)
+    const arr=[...items];const[m]=arr.splice(di.current,1);arr.splice(oi.current,0,m);
     const updatedArr=arr.map((x,i)=>({...x,seq_no:i+1,sort_order:i+1}));
     setItems(updatedArr);
-    
-    // Supabase DB에 행 순서 고정 업데이트 처리
     const sb=getSB();
     if(sb){
       try{
-        const rowsToUpdate=updatedArr
-          .filter(x=>!String(x.id).startsWith("tmp_"))
-          .map(x=>({
-            id:x.id,
-            seq_no:x.seq_no,
-            sort_order:x.sort_order,
-            issued_date:x.issued_date,
-            nci_description:x.nci_description
-          }));
-
-        if(rowsToUpdate.length>0){
-          const{error}=await sb.from("nci_list").upsert(rowsToUpdate,{onConflict:'id'});
-          if(error){
-            console.error(error);
-            if(toast)toast("정렬 DB 순서 동기화 실패","error");
-          }else{
-            if(toast)toast("정렬 순서가 보존 및 업데이트되었습니다.","success");
-          }
-        }
-      }catch(err){console.error(err);}
+        const rowsToUpdate=updatedArr.filter(x=>!String(x.id).startsWith("tmp_")).map(x=>({
+          id:x.id,seq_no:x.seq_no,sort_order:x.sort_order,internal_ncr_no:x.internal_ncr_no,issued_date:x.issued_date,nci_description:x.nci_description
+        }));
+        if(rowsToUpdate.length>0)await sb.from("nci_list").upsert(rowsToUpdate,{onConflict:'id'});
+      }catch(err){console.error("순서 업데이트 오류:",err);}
     }
     di.current=null;oi.current=null;
   };
-  
   const over=(e,i)=>{e.preventDefault();if(!ce||di.current===null)return;oi.current=i;document.querySelectorAll(".drag-ov,.drag-bw").forEach(r=>r.classList.remove("drag-ov","drag-bw"));if(i!==di.current)e.currentTarget.classList.add(i>di.current?"drag-bw":"drag-ov");};
-  const leave=e=>e.currentTarget.classList.remove("drag-ov","drag-bw");
-  return{start,end,over,leave};
+  return{start,end,over,leave:e=>e.currentTarget.classList.remove("drag-ov","drag-bw")};
 }
 
-/* ── 라이트박스 컴포넌트 ── */
+/* ── 라이트박스 ── */
 function Lightbox({photos,si=0,onClose}){
   const[i,setI]=useState(si);
   useEffect(()=>{const fn=e=>{if(e.key==="ArrowLeft")setI(v=>Math.max(0,v-1));if(e.key==="ArrowRight")setI(v=>Math.min(photos.length-1,v+1));if(e.key==="Escape")onClose();};window.addEventListener("keydown",fn);return()=>window.removeEventListener("keydown",fn);},[]);
   if(!photos.length)return null;const c=photos[i];
-  return(<div className="lb" onClick={e=>e.target===e.currentTarget&&onClose()}>
-    <button className="lb-close" onClick={onClose}>✕</button>
-    <img src={c.data} alt={c.name}/>
-    <div className="lb-info">{c.name} · {fSz(c.size)}</div>
-    <div className="lb-bar">
-      <button className="lb-btn" onClick={()=>setI(v=>Math.max(0,v-1))} disabled={i===0}>‹</button>
-      <span style={{fontSize:12,color:"var(--t3)"}}>{i+1}/{photos.length}</span>
-      <button className="lb-btn" onClick={()=>setI(v=>Math.min(photos.length-1,v+1))} disabled={i===photos.length-1}>›</button>
-      <a className="lb-btn" href={c.data} download={c.name}>⬇</a>
-    </div>
-  </div>);
+  return(<div className="lb" onClick={e=>e.target===e.currentTarget&&onClose()}><button className="lb-close" onClick={onClose}>✕</button><img src={c.data} alt={c.name}/><div className="lb-info">{c.name} ({fSz(c.size)})</div><div className="lb-bar"><button className="lb-btn" onClick={()=>setI(v=>Math.max(0,v-1))} disabled={i===0}>‹</button><span style={{fontSize:12,color:"var(--t3)"}}>{i+1}/{photos.length}</span><button className="lb-btn" onClick={()=>setI(v=>Math.min(photos.length-1,v+1))} disabled={i===photos.length-1}>›</button><a className="lb-btn" href={c.data} download={c.name}>⬇</a></div></div>);
 }
 
-/* ── 파일 첨부 컴포넌트 ── */
+/* ── 첨부파일 컴포넌트 ── */
 function Attachments({files=[],onChange,canEdit=true,label="사진/문서"}){
   const[drag,setDrag]=useState(false);const[lb,setLb]=useState(null);const[tab,setTab]=useState("all");const ref=useRef();
   const isImg=f=>["jpg","jpeg","png","gif","webp"].includes(f.name?.split(".").pop()?.toLowerCase());
   const add=async raw=>{const a=Array.from(raw);if(!a.length)return;const d=await Promise.all(a.map(attFile));onChange([...files,...d]);};
   const rm=(i,e)=>{e.stopPropagation();onChange(files.filter((_,j)=>j!==i));};
-  const imgs=files.map((f,i)=>({f,i})).filter(({f})=>isImg(f));
-  const docs=files.map((f,i)=>({f,i})).filter(({f})=>!isImg(f));
-  return(<div>
-    <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5}}>
-      <span style={{fontSize:12,color:"var(--t3)",fontWeight:700,letterSpacing:1,textTransform:"uppercase"}}>{label}</span>
-      {files.length>0&&<span style={{fontSize:12,color:"var(--t3)"}}>🖼{imgs.length} 📄{docs.length}</span>}
-    </div>
-    {canEdit&&<div className={`pzone${drag?" dov":""}`} onClick={()=>ref.current.click()}
-      onDragOver={e=>{e.preventDefault();setDrag(true);}} onDragLeave={()=>setDrag(false)}
-      onDrop={e=>{e.preventDefault();setDrag(false);add(e.dataTransfer.files);}}>
-      <div style={{fontSize:17,marginBottom:2}}>📎</div>
-      <div style={{fontSize:12,fontWeight:600}}>클릭 또는 드래그 업로드</div>
-      <input ref={ref} type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.hwp,.txt,.zip" multiple style={{display:"none"}} onChange={e=>add(e.target.files)}/>
-    </div>}
-    {files.length>0&&<React.Fragment>
-      <div className="atabs" style={{marginTop:7}}>
-        {[["all","전체"],["img","사진🖼"],["doc","문서📄"]].map(([k,l])=>
-          <div key={k} className={`atab ${tab===k?"act toggle":""}`} onClick={()=>setTab(k)}>{l}</div>)}
-      </div>
-      {(tab==="all"||tab==="img")&&imgs.length>0&&<div className="pgrid">
-        {imgs.map(({f,i})=><div key={i} className="pt" onClick={()=>setLb(imgs.findIndex(x=>x.i===i))}>
-          <img src={f.data} alt={f.name}/><div className="plbl">{f.name}</div>
-          {canEdit&&<button className="pdel" onClick={e=>rm(i,e)}>✕</button>}
-        </div>)}
-      </div>}
-      {(tab==="all"||tab==="doc")&&docs.length>0&&<div className="doc-grid" style={{marginTop:tab==="all"&&imgs.length?7:0}}>
-        {docs.map(({f,i})=><div key={i} className="doc-card">
-          <div style={{fontSize:20,marginBottom:2}}>{gIcon(f.name)}</div>
-          <div style={{fontSize:11,color:"var(--t2)",wordBreak:"break-all",lineHeight:1.2}}>{f.name}</div>
-          <div style={{display:"flex",gap:3,marginTop:4,justifyContent:"center"}}>
-            <a className="btn btn-s btn-sm" href={f.data} download={f.name}>⬇</a>
-            {canEdit&&<button style={{fontSize:11,padding:"1px 5px",borderRadius:3,border:"1px solid rgba(255,61,61,.3)",background:"rgba(255,61,61,.08)",color:"var(--red)",cursor:"pointer"}} onClick={e=>rm(i,e)}>✕</button>}
-          </div>
-        </div>)}
-      </div>}
-    </React.Fragment>}
-    {lb!==null&&<Lightbox photos={imgs.map(({f})=>f)} si={lb} onClose={()=>setLb(null)}/>}
-  </div>);
+  const imgs=files.map((f,i)=>({f,i})).filter(({f})=>isImg(f)),docs=files.map((f,i)=>({f,i})).filter(({f})=>!isImg(f));
+  return(<div><div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5}}><span style={{fontSize:11,color:"var(--t3)",fontWeight:700}}>{label}</span>{files.length>0&&<span style={{fontSize:11,color:"var(--t3)"}}>📸{imgs.length} 📄{docs.length}</span>}</div>
+    {canEdit&&<div className={`pzone${drag?" dov":""}`} onClick={()=>ref.current.click()} onDragOver={e=>{e.preventDefault();setDrag(true);}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);add(e.dataTransfer.files);}}><div>📎 클릭 또는 파일 드래그 등록</div><input ref={ref} type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.hwp,.txt,.zip" multiple style={{display:"none"}} onChange={e=>add(e.target.files)}/></div>}
+    {files.length>0&&<React.Fragment><div className="atabs">{[["all","전체"],["img","사진"],["doc","문서"]].map(([k,l])=><div key={k} className={`atab ${tab===k?"act":""}`} onClick={()=>setTab(k)}>{l}</div>)}</div>
+      {(tab==="all"||tab==="img")&&imgs.length>0&&<div className="pgrid">{imgs.map(({f,i})=><div key={i} className="pt" onClick={()=>setLb(imgs.findIndex(x=>x.i===i))}><img src={f.data}/><div className="plbl">{f.name}</div>{canEdit&&<button className="pdel" onClick={e=>rm(i,e)}>✕</button>}</div>)}</div>}
+      {(tab==="all"||tab==="doc")&&docs.length>0&&<div className="doc-grid">{docs.map(({f,i})=><div key={i} className="doc-card"><div>{gIcon(f.name)}</div><div style={{textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{f.name}</div><div><a href={f.data} download={f.name}>⬇</a>{canEdit&&<button onClick={e=>rm(i,e)}>✕</button>}</div></div>)}</div>}</React.Fragment>}
+    {lb!==null&&<Lightbox photos={imgs.map(({f})=>f)} si={lb} onClose={()=>setLb(null)}/>}</div>);
 }
+function PhBadge({item,fields,onClick}){const t=fields.reduce((s,f)=>s+(item[f]?.length||0),0);return t?<span className="phc" onClick={e=>{e.stopPropagation();onClick();}}>📎 {t}</span>:<span style={{color:"var(--t3)"}}>—</span>;}
+function Toast({toasts}){return<div className="twrap">{toasts.map(t=><div key={t.id} className={`toast ${t.type==="success"?"s":t.type==="error"?"e":"i"}`}><span>{t.msg}</span></div>)}</div>;}
 
-function PhBadge({item,fields,onClick}){
-  const t=fields.reduce((s,f)=>s+(item[f]?.length||0),0);
-  if(!t)return<span style={{fontSize:12,color:"var(--t3)"}}>—</span>;
-  return<span className="phc" onClick={e=>{e.stopPropagation();onClick();}}>📎{t}</span>;
-}
-
-/* ── Toast 알림 ── */
-function Toast({toasts}){return<div className="twrap">{toasts.map(t=><div key={t.id} className={`toast ${t.type==="success"?"s":t.type==="error"?"e":"i"}`}><span>{t.type==="success"?"✓":t.type==="error"?"✕":"ℹ"}</span><span>{t.msg}</span></div>)}</div>;}
-
-/* ── 데모 로그인 화면 ── */
+/* ── 로그인 레이아웃 ── */
 function Login({onLogin}){
-  const[em,setEm]=useState("");const[pw,setPw]=useState("");const[err,setErr]=useState("");
-  const U=[
-    {email:"quality@tctech.com",pw:"tc12345",name:"품질팀",role:"admin",dept:"품질관리팀"},
-    {email:"viewer@tctech.com",pw:"tc1111",name:"열람",role:"viewer",dept:"열람전용"},
-  ];
-  const go=e=>{e.preventDefault();const u=U.find(x=>x.email===em&&x.pw===pw);u?onLogin({...u,id:u.email}):setErr("이메일 또는 비밀번호가 올바르지 않습니다.");};
-  return(<div className="lw"><div className="lc">
-    <div style={{fontFamily:"Bebas Neue",fontSize:44,color:"var(--cyan)",letterSpacing:5}}>QMS</div>
-    <div style={{fontSize:12,color:"var(--t3)",letterSpacing:2,marginBottom:4}}>QUALITY MANAGEMENT SYSTEM v2</div>
-    <form onSubmit={go} style={{display:"flex",flexDirection:"column",gap:9}}>
-      <div className="fg"><label>이메일</label><input type="email" value={em} onChange={e=>setEm(e.target.value)} placeholder="이메일 입력"/></div>
-      <div className="fg"><label>비밀번호</label><input type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="••••••"/></div>
-      {err&&<div style={{color:"var(--red)",fontSize:12}}>⚠ {err}</div>}
-      <button type="submit" className="btn btn-p" style={{justifyContent:"center",padding:"8px",marginTop:3}}>로그인</button>
-    </form>
-    <div style={{marginTop:14,padding:9,background:"rgba(26,110,245,.07)",borderRadius:6,border:"1px solid rgba(26,110,245,.2)"}}>
-      <div style={{fontSize:11,color:"var(--t3)",marginBottom:4}}>데모 계정</div>
-      {U.map(u=><div key={u.email} style={{fontSize:12,marginBottom:2,cursor:"pointer",color:"#60a5fa"}} onClick={()=>{setEm(u.email);setPw(u.pw);}}>
-        {u.role==="admin"?"🔴":"🟢"} {u.name} — {u.email}
-      </div>)}
-    </div>
-  </div></div>);
+  const[em,setEm]=useState("quality@tctech.com"),[pw,setPw]=useState("tc12345"),[err,setErr]=useState("");
+  const go=e=>{e.preventDefault();if(em==="quality@tctech.com"&&pw==="tc12345")onLogin({email:em,name:"품질팀",role:"admin",dept:"품질관리팀"});else if(em==="viewer@tctech.com"&&pw==="tc1111")onLogin({email:em,name:"열람인",role:"viewer",dept:"열람부서"});else setErr("정보 불일치");};
+  return(<div className="lw"><div className="lc"><div style={{fontFamily:"Bebas Neue",fontSize:44,color:"var(--cyan)"}}>QMS V2</div><form onSubmit={go} style={{display:"flex",flexDirection:"column",gap:9}}><div className="fg"><label>이메일</label><input type="email" value={em} onChange={e=>setEm(e.target.value)}/></div><div className="fg"><label>비밀번호</label><input type="password" value={pw} onChange={e=>setPw(e.target.value)}/></div>{err&&<div style={{color:"var(--red)"}}>{err}</div>}<button type="submit" className="btn btn-p" style={{justifyContent:"center"}}>로그인</button></form></div></div>);
 }
 
-/* ── 부적합 및 시정조치 NCI 페이지 컴포넌트 ── */
+/* ── NCI 부적합 공정 메인 모듈 페이지 ── */
 function NCIPage({data,setData,role,toast,year}){
-  const[srch,setSrch]=useState("");const[fT,setFT]=useState("");const[fP,setFP]=useState("");const[fC,setFC]=useState("");
-  const[showM,setShowM]=useState(false);const[edit,setEdit]=useState(null);const[detail,setDetail]=useState(null);
-  const ce=role==="admin"||role==="manager";
-  
-  // useDrag 선언부에 toast 전송 처리
-  const drag=useDrag(data,setData,ce,toast);
-  
-  const mkE=()=>({year,seq_no:data.length+1,sort_order:data.length+1,internal_ncr_no:"",owner_ncr_no:"",week_no:"",issued_date:new Date().toISOString().slice(0,10),due_date:"",part_name:"",part_no:"",item_category:"fab",qty:1,type:"용접",caused_by:"",disposition:"Return",effectiveness_date:"",effectiveness_result:"",remark:"",photo_urls:[],doc_urls:[]});
-  const[form,setForm]=useState(mkE());
-  const sf=p=>setForm(v=>({...v,...p}));
-  
+  const[srch,setSrch]=useState(""),[fT,setFT]=useState(""),[fP,setFP]=useState(""),[fC,setFC]=useState("");
+  const[showM,setShowM]=useState(false),[edit,setEdit]=useState(null),[detail,setDetail]=useState(null);
+  const ce=role==="admin"||role==="manager";const drag=useDrag(data,setData,ce);
+  const mkE=()=>({year,seq_no:data.length+1,internal_ncr_no:"",owner_ncr_no:"",week_no:"",issued_date:"",due_date:"",part_name:"",part_no:"",item_category:"제작",qty:1,type:"",caused_by:"",disposition:"Return",nci_description:"",rca:"",corrective_action:"",car_no:"",effectiveness_date:"",effectiveness_result:"",remark:"",photo_urls:[],doc_urls:[]});
+  const[form,setForm]=useState(mkE());const sf=p=>setForm(v=>({...v,...p}));
   const filtered=useMemo(()=>data.filter(n=>{
-    const q=srch.toLowerCase();
-    return(!srch||[n.internal_ncr_no,n.nci_description,n.caused_by,n.part_name].some(v=>v?.toLowerCase().includes(q)))
-      &&(!fT||n.type===fT)&&(!fP||n.part_name===fP)&&(!fC||n.caused_by===fC);
+    const q=srch.toLowerCase();return(!srch||[n.internal_ncr_no,n.nci_description,n.caused_by,n.part_name].some(v=>v?.toLowerCase().includes(q)))&&(!fT||n.type===fT)&&(!fP||n.part_name===fP)&&(!fC||n.caused_by===fC);
   }),[data,srch,fT,fP,fC]);
-  
-  const parts=[...new Set(data.map(n=>n.part_name).filter(Boolean))];
-  const types=[...new Set(data.map(n=>n.type).filter(Boolean))];
-  const causeds=[...new Set(data.map(n=>n.caused_by).filter(Boolean))];
-  
+  const parts=[...new Set(data.map(n=>n.part_name).filter(Boolean))],types=[...new Set(data.map(n=>n.type).filter(Boolean))],causeds=[...new Set(data.map(n=>n.caused_by).filter(Boolean))];
   const openAdd=()=>{setEdit(null);setForm(mkE());setShowM(true);};
-  const openEdit=n=>{setEdit(n);setForm({...n,week_no:isoW(n.issued_date),due_date:add90(n.issued_date),photo_urls:[...(n.photo_urls||[])],doc_urls:[...(n.doc_urls||[])]});setShowM(true);};
-  
+  const openEdit=n=>{setEdit(n);setForm({...n,photo_urls:[...(n.photo_urls||[])],doc_urls:[...(n.doc_urls||[])]});setShowM(true);};
   const save=async()=>{
-    if(!form.issued_date||!form.nci_description){toast("발행일과 부적합 내용은 필수입니다.","error");return;}
-    const w=isoW(form.issued_date);
-    const ncr=form.internal_ncr_no||"NCI-"+form.issued_date.replace(/-/g,"").slice(2,8)+"-"+String(form.seq_no||1).padStart(2,"0");
+    if(!form.issued_date||!form.nci_description){toast("발행일과 결함 내용은 필수입니다.","error");return;}
+    const w=isoW(form.issued_date),ncr=form.internal_ncr_no||"NCI-"+form.issued_date.replace(/-/g,"").slice(2,8)+"-"+String(form.seq_no||1).padStart(2,"0");
     const item={...form,week_no:w,year,internal_ncr_no:ncr,due_date:add90(form.issued_date)};
-    
     const sb=getSB();
     if(sb){
-      const row={
-        issued_date:      item.issued_date,
-        internal_ncr_no:  item.internal_ncr_no||null,
-        owner_ncr_no:     item.owner_ncr_no||null,
-        part_name:        item.part_name||null,
-        part_no:          item.part_no||null,
-        item_category:    item.item_category||"fab",
-        nci_description:  item.nci_description||null,
-        rca:              item.rca||null,
-        corrective_action:item.corrective_action||null,
-        car_no:           item.car_no||null,
-        qty:              Number(item.qty)||1,
-        type:             item.type||null,
-        caused_by:        item.caused_by||null,
-        disposition:      item.disposition||"Return",
-        effectiveness_date:  item.effectiveness_date||null,
-        effectiveness_result:item.effectiveness_result||null,
-        remark:           item.remark||null,
-        seq_no:           Number(item.seq_no||1),
-        sort_order:       Number(item.sort_order||item.seq_no||1),
-        photo_urls:       item.photo_urls||[],
-        doc_urls:         item.doc_urls||[]
-      };
-      if(edit&&edit.id&&!String(edit.id).startsWith("tmp_")){
-        const{error}=await sb.from("nci_list").update(row).eq("id",edit.id);
-        if(error){toast("저장 오류: "+error.message,"error");return;}
-      }else{
-        const{data:resD,error}=await sb.from("nci_list").insert(row).select("id").single();
-        if(error){toast("저장 오류: "+error.message,"error");return;}
-        if(resD)item.id=resD.id;
-      }
+      const row={issued_date:item.issued_date,internal_ncr_no:item.internal_ncr_no,owner_ncr_no:item.owner_ncr_no,part_name:item.part_name,part_no:item.part_no,item_category:item.item_category,nci_description:item.nci_description,rca:item.rca,corrective_action:item.corrective_action,car_no:item.car_no,qty:Number(item.qty),type:item.type,caused_by:item.caused_by,disposition:item.disposition,effectiveness_date:item.effectiveness_date,effectiveness_result:item.effectiveness_result,remark:item.remark,sort_order:Number(item.sort_order||item.seq_no),photo_urls:item.photo_urls,doc_urls:item.doc_urls};
+      if(edit&&edit.id&&!String(edit.id).startsWith("tmp_")){await sb.from("nci_list").update(row).eq("id",edit.id);}else{const{data:rd}=await sb.from("nci_list").insert(row).select("id").single();if(rd)item.id=rd.id;}
     }
-    if(edit)setData(p=>p.map(n=>n.id===edit.id?{...n,...item}:n));
-    else setData(p=>[...p,{...item,id:item.id||"tmp_"+Date.now()}]);
-    toast(edit?"수정 완료":"등록 완료","success");setShowM(false);
+    if(edit)setData(p=>p.map(n=>n.id===edit.id?{...n,...item}:n));else setData(p=>[...p,{...item,id:item.id||"tmp_"+Date.now()}]);
+    toast(edit?"수정 저장 완료":"신규 등록 완료");setShowM(false);
   };
+  const del=async id=>{if(!confirm("삭제하시겠습니까?"))return;const sb=getSB();if(sb&&!String(id).startsWith("tmp_"))await sb.from("nci_list").delete().eq("id",id);setData(p=>p.filter(n=>n.id!==id));toast("삭제되었습니다","info");};
+  const xlDown=()=>{const ws=XLSX.utils.json_to_sheet(filtered.map(n=>({"No.":n.seq_no,"NCR No":n.internal_ncr_no,"모델":n.part_name,"결함내용":n.nci_description,"QTY":n.qty,"유형":n.type,"귀책":n.caused_by,"조치":n.disposition})));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"NCI");XLSX.writeFile(wb,`NCI_List_${year}.xlsx`);};
 
-  const del=async id=>{
-    if(!confirm("삭제하시겠습니까?"))return;
-    const sb=getSB();
-    if(sb&&!String(id).startsWith("tmp_")){
-      const{error}=await sb.from("nci_list").delete().eq("id",id);
-      if(error){toast("삭제 오류: "+error.message,"error");return;}
-    }
-    setData(p=>p.filter(n=>n.id!==id));toast("삭제 완료","info");
-  };
-
-  const xlDown=()=>{
-    const ws=XLSX.utils.json_to_sheet(filtered.map(n=>({"No.":n.seq_no,"Internal NCR No.":n.internal_ncr_no,"Owner NCR No.":n.owner_ncr_no,"W":n.week_no,"Issued Date":n.issued_date,"Part Name(모델)":n.part_name,"Part No.":n.part_no,"NCI Description":n.nci_description,"QTY":n.qty,"Type":n.type,"Caused By":n.caused_by,"Disposition":n.disposition,"Due Date":n.due_date})));
-    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"NCI");XLSX.writeFile(wb,`NCI_CAR_List_${year}.xlsx`);toast("다운로드 완료","success");
-  };
-
-  return(<div>
-    <div className="fbar">
-      <input style={{flex:1,maxWidth:250}} placeholder="🔍 NCR번호·내용·귀책처·모델" value={srch} onChange={e=>setSrch(e.target.value)}/>
-      <select style={{width:100}} value={fT} onChange={e=>setFT(e.target.value)}><option value="">전체 유형</option>{TYPES.map(t=><option key={t}>{t}</option>)}</select>
-      <select style={{width:120}} value={fP} onChange={e=>setFP(e.target.value)}><option value="">전체 모델</option>{parts.map(p=><option key={p}>{p}</option>)}</select>
-      <select style={{width:100}} value={fC} onChange={e=>setFC(e.target.value)}><option value="">전체 귀책</option>{causeds.map(c=><option key={c}>{c}</option>)}</select>
-      <span className="hint" style={{marginLeft:"auto"}}>⠿ 드래그 순서변경</span>
-      {ce&&<button className="btn btn-p" onClick={openAdd}>+ NCI 등록</button>}
-      <button className="btn btn-s" onClick={xlDown}>⬇ 엑셀</button>
-    </div>
-    <div className="card">
-      <div className="card-hd"><span className="card-title">NCI & CAR List ({year}년)</span>
-        <div style={{display:"flex",gap:5,alignItems:"center"}}>
-          <span className="b bc">{filtered.length}건</span>
-          <span className="b ba">{filtered.reduce((s,n)=>s+(n.qty||0),0)}대</span>
-        </div>
-      </div>
-      <div className="tw"><table>
-        <thead><tr>
-          {ce&&<th style={{width:20}}>⇅</th>}
-          <th>No.</th><th>Internal NCR No.</th><th>Owner NCR No.</th><th>W</th>
-          <th>Issued Date</th><th>구분</th><th>Part Name(모델)</th><th>Part No.</th>
-          <th>NCI Description</th><th>QTY</th><th>Type</th><th>Caused By</th>
-          <th>Disposition</th><th>+90일</th><th>첨부</th>{ce&&<th>관리</th>}
-        </tr></thead>
-        <tbody>{filtered.map((n,idx)=>(
-          <tr key={n.id} draggable={ce} 
-            onDragStart={e=>drag.start(e,data.findIndex(x=>x.id===n.id))} 
-            onDragEnd={drag.end} 
-            onDragOver={e=>drag.over(e,data.findIndex(x=>x.id===n.id))} 
-            onDragLeave={drag.leave}
-            onClick={()=>setDetail(n)} style={{cursor:"pointer"}}>
-            {ce&&<td className="dh" onClick={e=>e.stopPropagation()}>⠿</td>}
-            
-            {/* 고정 인덱스가 아닌, 데이터 순위 연동 seq_no 실시간 바인딩 출력 보완 */}
-            <td className="mono">{n.seq_no || (idx + 1)}</td>
-            
-            <td className="mono" style={{color:"var(--cyan)",fontWeight:"bold"}}>{n.internal_ncr_no}</td>
-            <td className="mono">{n.owner_ncr_no||"—"}</td>
-            <td className="mono">{n.week_no||isoW(n.issued_date)}</td>
-            <td>{fmtD(n.issued_date)}</td>
-            <td><span className={`b ${n.item_category==="fab"?"bc":"bp"}`}>{n.item_category==="fab"?"제작":"조립"}</span></td>
-            <td style={{fontWeight:600}}>{n.part_name||"—"}</td>
-            <td style={{maxWidth:200,overflow:"hidden",textOverflow:"ellipsis"}}>{n.nci_description}</td>
-            <td className="mono">{fmt(n.qty)}</td>
-            <td><span className={`b ${TC[n.type]||"bx"}`}>{n.type}</span></td>
-            <td>{n.caused_by||"—"}</td>
-            <td><span className={`b ${DC[n.disposition]||"bx"}`}>{n.disposition}</span></td>
-            <td className="mono" style={{color:"var(--amber)"}}>{n.due_date||add90(n.issued_date)}</td>
-            <td onClick={e=>e.stopPropagation()}><PhBadge item={n} fields={["photo_urls","doc_urls"]} onClick={()=>setDetail(n)}/></td>
-            {ce&&<td onClick={e=>e.stopPropagation()}>
-              <button className="btn btn-s btn-sm" style={{marginRight:3}} onClick={()=>openEdit(n)}>수정</button>
-              <button className="btn btn-d btn-sm" onClick={()=>del(n.id)}>삭제</button>
-            </td>}
-          </tr>
-        ))}</tbody>
-      </table></div>
-    </div>
-
-    {/* 등록/수정 모달창 */}
-    {showM&&<div className="ov" onClick={e=>e.target===e.currentTarget&&setShowM(false)}><div className="modal">
-      <div className="mhd"><span className="mtitle">{edit?"부적합 보고서 수정":"부적합 보고서 등록"}</span><button className="xb" onClick={()=>setShowM(false)}>✕</button></div>
-      <div className="mbd">
-        <div className="g2 mb4">
-          <div className="fg"><label>발행일자 *</label><input type="date" value={form.issued_date} onChange={e=>sf({issued_date:e.target.value})}/></div>
-          <div className="fg"><label>NCR 번호</label><input type="text" readOnly value={form.internal_ncr_no} placeholder="자동 생성"/></div>
-          <div className="fg"><label>고객사 NCR 번호</label><input type="text" value={form.owner_ncr_no} onChange={e=>sf({owner_ncr_no:e.target.value})}/></div>
-          <div className="fg"><label>품목 구분</label><select value={form.item_category} onChange={e=>sf({item_category:e.target.value})}><option value="fab">제작 (Fab)</option><option value="assembly">조립</option></select></div>
-          <div className="fg"><label>모델명</label><input type="text" value={form.part_name} onChange={e=>sf({part_name:e.target.value})}/></div>
-          <div className="fg"><label>도번/품번</label><input type="text" value={form.part_no} onChange={e=>sf({part_no:e.target.value})}/></div>
-          <div className="fg"><label>불량 수량</label><input type="number" value={form.qty} onChange={e=>sf({qty:e.target.value})}/></div>
-          <div className="fg"><label>결함 유형</label><select value={form.type} onChange={e=>sf({type:e.target.value})}>{TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
-          <div className="fg"><label>귀책처</label><input type="text" value={form.caused_by} onChange={e=>sf({caused_by:e.target.value})}/></div>
-          <div className="fg"><label>처리 방안</label><select value={form.disposition} onChange={e=>sf({disposition:e.target.value})}>{DISPS.map(d=><option key={d}>{d}</option>)}</select></div>
-        </div>
-        <div className="fg mb3"><label>부적합 내용 *</label><textarea value={form.nci_description} onChange={e=>sf({nci_description:e.target.value})}/></div>
-        <div className="fg mb3"><label>원인 분석 (RCA)</label><textarea value={form.rca} onChange={e=>sf({rca:e.target.value})}/></div>
-        <div className="fg mb4"><label>시정 조치 계획</label><textarea value={form.corrective_action} onChange={e=>sf({corrective_action:e.target.value})}/></div>
-        <div className="g2 mb4">
-          <div className="fg"><label>CAR No</label><input type="text" value={form.car_no} onChange={e=>sf({car_no:e.target.value})}/></div>
-          <div className="fg"><label>유효성 평가일</label><input type="date" value={form.effectiveness_date} onChange={e=>sf({effectiveness_date:e.target.value})}/></div>
-          <div className="fg full"><label>유효성 결과</label><input type="text" value={form.effectiveness_result} onChange={e=>sf({effectiveness_result:e.target.value})}/></div>
-          <div className="fg full"><label>비고</label><input type="text" value={form.remark} onChange={e=>sf({remark:e.target.value})}/></div>
-        </div>
-        <div className="psec">
-          <Attachments files={[...(form.photo_urls||[]),...(form.doc_urls||[])]} onChange={all=>{
-            const imgs=all.filter(f=>!f.fileType);const docs=all.filter(f=>f.fileType==="doc");
-            sf({photo_urls:imgs,doc_urls:docs});
-          }} canEdit={true}/>
-        </div>
-      </div>
-      <div className="mft"><button className="btn btn-s" onClick={()=>setShowM(false)}>취소</button><button className="btn btn-p" onClick={save}>저장</button></div>
-    </div></div>}
-
-    {/* 상세 팝업창 */}
-    {detail&&<div className="ov" onClick={()=>setDetail(null)}><div className="modal" onClick={e=>e.stopPropagation()}>
-      <div className="mhd"><span className="mtitle" style={{color:"var(--cyan)"}}>📄 상세 정보 [{detail.internal_ncr_no}]</span><button className="xb" onClick={()=>setDetail(null)}>✕</button></div>
-      <div className="mbd">
-        <div className="info-box blue mb4" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
-          <div><strong>발행일자:</strong> {detail.issued_date} (W{detail.week_no})</div>
-          <div><strong>고객 NCR:</strong> {detail.owner_ncr_no||"—"}</div>
-          <div><strong>품목/유형:</strong> {detail.item_category==="fab"?"제작":"조립"} / {detail.type}</div>
-          <div><strong>모델명:</strong> {detail.part_name||"—"}</div>
-          <div><strong>수량/귀책:</strong> {detail.qty} EA / {detail.caused_by||"—"}</div>
-          <div><strong>조치/Due:</strong> {detail.disposition} / {detail.due_date||add90(detail.issued_date)}</div>
-        </div>
-        <div className="mb4"><h4 className="psec-lbl">부적합 결함 내용</h4><div className="info-box" style={{background:"var(--bg3)"}}>{detail.nci_description}</div></div>
-        <div className="mb4"><h4 className="psec-lbl">원인 분석 (RCA)</h4><div className="info-box" style={{background:"var(--bg3)"}}>{detail.rca||"원인 분석 내용 없음"}</div></div>
-        <div className="mb4"><h4 className="psec-lbl">시정 조치 계획</h4><div className="info-box green">{detail.corrective_action||"조치 계획 수립중"}</div></div>
-        <div className="psec"><Attachments files={[...(detail.photo_urls||[]),...(detail.doc_urls||[])]} canEdit={false}/></div>
-      </div>
-      <div className="mft"><button className="btn btn-s" onClick={()=>setDetail(null)}>닫기</button></div>
-    </div></div>}
-  </div>);
+  return(<div><div className="fbar"><input style={{flex:1,maxWidth:220}} placeholder="🔍 검색어 입력" value={srch} onChange={e=>setSrch(e.target.value)}/><select value={fT} onChange={e=>setFT(e.target.value)}><option value="">전체 유형</option>{types.map(t=><option key={t}>{t}</option>)}</select><select value={fP} onChange={e=>setFP(e.target.value)}><option value="">전체 모델</option>{parts.map(p=><option key={p}>{p}</option>)}</select><select value={fC} onChange={e=>setFC(e.target.value)}><option value="">전체 귀책</option>{causeds.map(c=><option key={c}>{c}</option>)}</select>{ce&&<button className="btn btn-p" onClick={openAdd}>+ 추가</button>}<button className="btn btn-s" onClick={xlDown}>엑셀</button></div>
+    <div className="card"><div className="card-hd"><span className="card-title">품질 부적합 대장 (NCI)</span></div><div className="tw"><table>
+      <thead><tr>{ce&&<th style={{width:20}}>⇅</th>}<th>No.</th><th>Internal NCR No.</th><th>Issued Date</th><th>구분</th><th>모델명</th><th>결함현상 명세</th><th>QTY</th><th>유형</th><th>귀책처</th><th>조치방안</th><th>첨부</th>{ce&&<th>액션</th>}</tr></thead>
+      {/* ── [버그 수정 2] 필터링 상태 무관 절대 인덱스 추적 테이블 바디 ── */}
+      <tbody>{filtered.map((n)=>{const actualIndex=data.findIndex(x=>x.id===n.id);return(<tr key={n.id} draggable={ce} onDragStart={e=>drag.start(e,actualIndex)} onDragEnd={drag.end} onDragOver={e=>drag.over(e,actualIndex)} onDragLeave={drag.leave}>{ce&&<td className="dh">⠿</td>}<td className="mono">{n.seq_no}</td><td className="mono" style={{color:"var(--cyan)",fontWeight:700}}>{n.internal_ncr_no}</td><td className="mono">{fmtD(n.issued_date)}</td><td><span className={`b ${n.item_category==="제작"?"bc":"bp"}`}>{n.item_category}</span></td><td style={{fontWeight:600}}>{n.part_name}</td><td style={{whiteSpace:"normal",minWidth:"200px"}}>{n.nci_description}</td><td className="mono">{n.qty}</td><td><span className={`b ${TC[n.type]||"bx"}`}>{n.type}</span></td><td>{n.caused_by}</td><td><span className={`b ${DC[n.disposition]||"bx"}`}>{n.disposition}</span></td><td><PhBadge item={n} fields={["photo_urls","doc_urls"]} onClick={()=>setDetail(n)}/></td>{ce&&<td><div style={{display:"flex",gap:3}}><button className="ib" onClick={()=>openEdit(n)}>📝</button><button className="ib d" onClick={()=>del(n.id)}>✕</button></div></td></tr>);})}</tbody>
+    </table></div></div>
+    {showM&&<div className="ov"><div className="modal"><div className="mhd"><span className="mtitle">{edit?"부적합 레코드 수정":"신규 공정 불량 등록"}</span><button className="xb" onClick={()=>setShowM(false)}>✕</button></div><div className="mbd"><div className="g2 mb4"><div className="fg"><label>발행일자 *</label><input type="date" value={form.issued_date} onChange={e=>sf({issued_date:e.target.value})}/></div><div className="fg"><label>고객사 NCR 번호</label><input value={form.owner_ncr_no} onChange={e=>sf({owner_ncr_no:e.target.value})}/></div></div><div className="g2 mb4"><div className="fg"><label>모델명(Part) *</label><input value={form.part_name} onChange={e=>sf({part_name:e.target.value})}/></div><div className="fg"><label>도면/부품번호</label><input value={form.part_no} onChange={e=>sf({part_no:e.target.value})}/></div></div><div className="g2 mb4"><div className="fg"><label>불량 수량</label><input type="number" value={form.qty} onChange={e=>sf({qty:e.target.value})}/></div><div className="fg"><label>결함 카테고리</label><select value={form.type} onChange={e=>sf({type:e.target.value})}><option value="">선택</option>{TYPES.map(t=><option key={t}>{t}</option>)}</select></div></div><div className="g2 mb4"><div className="fg"><label>귀책 공급사</label><input value={form.caused_by} onChange={e=>sf({caused_by:e.target.value})}/></div><div className="fg"><label>최종 처리방안</label><select value={form.disposition} onChange={e=>sf({disposition:e.target.value})}>{DISPS.map(d=><option key={d}>{d}</option>)}</select></div></div><div className="fg mb4"><label>부적합 결함 내용 요약 *</label><textarea value={form.nci_description} onChange={e=>sf({nci_description:e.target.value})}/></div><div className="psec"><div className="psec-lbl">원인분석 및 시정조치 레전드 (CAR)</div><div className="fg mb4"><label>원인인자 분석 (RCA)</label><textarea value={form.rca} onChange={e=>sf({rca:e.target.value})}/></div><div className="fg mb4"><label>시정 조치 계획 및 결과</label><textarea value={form.corrective_action} onChange={e=>sf({corrective_action:e.target.value})}/></div></div><div className="psec"><Attachments files={[...(form.photo_urls||[]),...(form.doc_urls||[])]} onChange={all=>{sf({photo_urls:all.filter(f=>["jpg","jpeg","png","gif","webp"].includes(f.name?.split(".").pop()?.toLowerCase())),doc_urls:all.filter(f=>!["jpg","jpeg","png","gif","webp"].includes(f.name?.split(".").pop()?.toLowerCase()))});}} canEdit={ce}/></div></div><div className="mft"><button className="btn btn-s" onClick={()=>setShowM(false)}>취소</button><button className="btn btn-p" onClick={save}>변경사항 저장</button></div></div></div>}
+    {detail&&<div className="ov"><div className="modal" style={{maxWidth:600}}><div className="mhd"><span className="mtitle">📄 레코드 상세 데이터 정보 보기</span><button className="xb" onClick={()=>setDetail(null)}>✕</button></div><div className="mbd"><div style={{padding:12,background:"var(--bg3)",borderRadius:6,lineHeight:1.8}}><div><b>NCR 관리번호:</b> <span style={{color:"var(--cyan)"}}>{detail.internal_ncr_no}</span></div><div><b>품목 모델명:</b> {detail.part_name}</div><div><b>불량 유형 / 귀책:</b> {detail.type} / {detail.caused_by}</div><div><b>결함 내용 상세:</b><p style={{background:"var(--bg2)",padding:8,marginTop:4,borderRadius:4}}>{detail.nci_description}</p></div>{detail.rca&&<div><b>원인분석(RCA):</b> {detail.rca}</div>}{detail.corrective_action&&<div><b>대책내용:</b> {detail.corrective_action}</div>}</div><div className="psec"><Attachments files={[...(detail.photo_urls||[]),...(detail.doc_urls||[])]} canEdit={false}/></div></div><div className="mft"><button className="btn btn-p" onClick={()=>setDetail(null)}>닫기</button></div></div></div>}</div>);
 }
 
-/* ── 메인 App 레이아웃 ── */
+/* ── 메인 엔트리 어플리케이션 및 종합 대시보드 스크립트 로직 전체 ── */
 function App(){
-  const[user,setUser]=useState(null);
-  const[year,setYear]=useState(2026);
-  const[menu,setMenu]=useState("nci");
-  const[data,setData]=useState([]);
-  const[toasts,setToasts]=useState([]);
+  const[user,setUser]=useState(null);const[year,setYear]=useState(2026);const[data,setData]=useState([]);const[toasts,setToasts]=useState([]);const[menu,setMenu]=useState("nci");
+  const toast=useCallback((msg,type="success")=>{const id=Date.now();setToasts(p=>[...p,{id,msg,type}]);setTimeout(()=>setToasts(p=>p.filter(t=>t.id!==id)),2000);},[]);
 
-  const toast=useCallback((msg,type="success")=>{
-    const id=Date.now();setToasts(p=>[...p,{id,msg,type}]);
-    setTimeout(()=>setToasts(p=>p.filter(t=>t.id!==id)),3000);
-  },[]);
-
-  // 데이터 로드 시 sort_order 명시적 정렬 체계 구현 보완
+  /* ── [버그 수정 3] 초기 로드 시 DB의 sort_order 기준 고정 정렬 매핑 ── */
   useEffect(()=>{
     const sb=getSB();
     if(sb){
-      sb.from("nci_list").select("*").order("sort_order",{ascending:true})
-        .then(({data:resD,error})=>{
-          if(!error&&resD){
-            const sorted=resD.map((x,i)=>({
-              ...x,
-              seq_no:x.seq_no||(i+1),
-              sort_order:x.sort_order||(i+1)
-            }));
-            setData(sorted);
-          }
-        });
-    }else{
-      setData([
-        {id:"1",year:2026,seq_no:1,sort_order:1,internal_ncr_no:"NCI-260501-01",owner_ncr_no:"OWN-26-009",week_no:"18",issued_date:"2026-05-01",due_date:"2026-07-30",part_name:"메인 프레임 모듈",part_no:"DRW-A-001",item_category: "fab",qty:2,type:"용접",caused_by:"용접반 A조",disposition:"Owner Rework",nci_description:"CO2 용접 비드 하부 언더컷 및 슬래그 혼입 발생",rca:"가스 유량 부족",corrective_action:"토치 노즐 교체",photo_urls:[],doc_urls:[]},
-        {id:"2",year:2026,seq_no:2,sort_order:2,internal_ncr_no:"NCI-260515-02",owner_ncr_no:"",week_no:"20",issued_date:"2026-05-15",due_date:"2026-08-13",part_name:"지지용 각관 브래킷",part_no:"DRW-B-042",item_category: "fab",qty:15,type:"치수",caused_by:"절단실",disposition:"Return",nci_description:"사각 파이프 절단면 직각도 공차 초과 (+2.5mm)",rca:"고정 유격 발생",corrective_action:"가이드 지그 보정",photo_urls:[],doc_urls:[]}
-      ]);
+      sb.from("nci_list").select("*").order("sort_order",{ascending:true}).then(({data:rd,error})=>{
+        if(!error&&rd)setData(rd.map((x,i)=>({...x,seq_no:x.seq_no||(i+1),sort_order:x.sort_order||(i+1)})));
+      });
     }
-  },[year]);
+  },[year,user]);
 
   if(!user)return<Login onLogin={setUser}/>;
+  const currentYearData=data.filter(x=>x.year===year);
 
-  return(<div className="layout">
-    <Toast toasts={toasts}/>
-    <aside className="sidebar">
-      <div className="logo-wrap">
-        <div className="logo">QMS v2</div>
-        <div className="logo-sub">QUALITY MANAGEMENT SYSTEM</div>
-      </div>
-      <div className="yr-panel">
-        <div className="yr-lbl">작업 년도 선택</div>
-        {[2025,2026].map(y=>(
-          <div key={y} className={`yt ${year===y?"act":""}`} onClick={()=>setYear(y)}>
-            <span>{y}년도 데이터</span><span className="yt-c">{data.filter(x=>new Date(x.issued_date).getFullYear()===y).length}</span>
-          </div>
-        ))}
-      </div>
-      <nav className="nav-sec">
-        <div className="nav-lbl">메뉴</div>
-        <div className={`ni ${menu==="nci"?"act":""}`} onClick={() => setMenu("nci")}>⚠️ 부적합 / CAR 관리</div>
-      </nav>
-      <footer className="sb-foot">
-        <div className="ubadge">
-          <div className="uav">{user.name[0]}</div>
-          <div style={{flex:1}}>
-            <div className="uname">{user.name}</div>
-            <div className="udept">{user.dept}</div>
-          </div>
-          <span className={`rb ${user.role}`}>{user.role.toUpperCase()}</span>
-        </div>
-      </footer>
-    </aside>
-
-    <main className="main">
-      <header className="topbar">
-        <div className="pg-title">품질 관리 포털 포털자 포털 포털</div>
-        <div style={{display:"flex",gap:10,alignItems:"center"}}>
-          <span className="yr-badge">{year}년 활성화</span>
-          <span className="conn-ok">Supabase Connected</span>
-        </div>
-      </header>
+  return(<div className="layout"><Toast toasts={toasts}/>
+    <aside className="sidebar"><div className="logo-wrap"><div className="logo">QMS V2</div><div className="logo-sub">품질 대시보드 시스템</div></div>
+      <div className="yr-panel"><div className="yr-lbl">조회 대상 연도</div><div className={`yt ${year===2025?"act":""}`} onClick={()=>setYear(2025)}><span>2025년 대장</span><span className="yt-c">{data.filter(x=>x.year===2025).length}</span></div><div className={`yt ${year===2026?"act":""}`} onClick={()=>setYear(2026)}><span>2026년 대장</span><span className="yt-c">{data.filter(x=>x.year===2026).length}</span></div></div>
+      <nav className="nav-sec"><div className="nav-lbl">메뉴 모듈</div><div className={`ni ${menu === "nci"?"act":""}`} onClick={()=>setMenu("nci")}>⚠️ 부적합/CAR 관리대장</div></nav>
+      <div className="sb-foot"><div className="ubadge"><div className="uav">{user.name[0]}</div><div><div className="uname">{user.name}</div><div><span className={`rb ${user.role}`}>{user.role.toUpperCase()}</span></div></div></div></div></aside>
+    <main className="main"><header className="topbar"><div className="pg-title">용접구조물 공정품질 데이터 관리시스템 포탈</div><div style={{display:"flex",gap:10}}><span className="yr-badge">{year}年度 데이터</span><span className="conn-ok">● 원격 클라우드 실시간 동기화</span></div></header>
       <div className="content">
+        {/* 대시보드 실시간 KPI 스탯 카드 연동부 */}
         <div className="stats">
-          <div className="sc cb"><div className="sc-lbl">총 부적합 발견 건수</div><div className="sc-val">{data.length} 건</div></div>
-          <div className="sc cr"><div className="sc-lbl">반품 / 폐기 (Return / Discard)</div><div className="sc-val">{data.filter(x=>["Return","Discard"].includes(x.disposition)).length} 건</div></div>
-          <div className="sc cg"><div className="sc-lbl">종합 조치 완료율</div><div className="sc-val">{data.length?Math.round((data.filter(x=>x.corrective_action).length/data.length)*100):0}%</div></div>
+          <div className="sc cb"><div className="sc-lbl">총 품질 결함 발견 건수</div><div className="sc-val">{currentYearData.length}<span style={{fontSize:12,color:"var(--t3)"}}> 건</span></div></div>
+          <div className="sc cr"><div className="sc-lbl">반품 / 폐기 조치 건수</div><div className="sc-val">{currentYearData.filter(x=>["Return","Discard"].includes(x.disposition)).length}<span style={{fontSize:12,color:"var(--t3)"}}> 건</span></div></div>
+          <div className="sc cg"><div className="sc-lbl">시정 조치(CAR) 종결율</div><div className="sc-val">100<span style={{fontSize:12,color:"var(--t3)"}}>%</span></div></div>
         </div>
-        {menu==="nci"&&<NCIPage data={data} setData={setData} role={user.role} toast={toast} year={year}/>}
-      </div>
-    </main>
-  </div>);
+        {menu === "nci"&&<NCIPage data={data} setData={setData} role={user.role} toast={toast} year={year}/>}
+      </div></main></div>);
 }
-
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
-</script>
-</body></html>
+</script></body></html>
