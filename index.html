@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QMS v2 | 품질관리 시스템</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-ko: "Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;
+            --font-mono: "Calibri","Consolas",monospace;
+            --bg: #060d1a; --bg2: #0b1628; --bg3: #0f1f38; --bg4: #162a4a;
+            --cyan: #00d4ff; --blue: #1a6ef5; --green: #00e676; --amber: #ffab00; --red: #ff3d3d; --purple: #8b5cf6; --teal: #00bcd4;
+            --t1: #e8f4fd; --t2: #7fb3d3; --t3: #3a6080; --bdr: #143050; --bdr2: #1a3a58; --r: 6px; --rl: 10px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-ko); background: var(--bg); color: var(--t1); min-height: 100vh; font-size: 13px; overflow-x: hidden; }
+        
+        /* 로그인 화면 */
+        .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-card { width: 350px; background: var(--bg2); border: 1px solid var(--bdr); border-radius: var(--rl); padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        
+        /* 메인 레이아웃 */
+        .layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 210px; min-width: 210px; background: var(--bg2); border-right: 1px solid var(--bdr); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; }
+        .main { margin-left: 210px; flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .topbar { height: 44px; background: var(--bg2); border-bottom: 1px solid var(--bdr); display: flex; align-items: center; justify-content: space-between; padding: 0 18px; position: sticky; top: 0; z-index: 90; }
+        .content { padding: 14px; flex: 1; }
+        
+        /* 컴포넌트 스타일 */
+        .logo-wrap { padding: 12px; border-bottom: 1px solid var(--bdr); }
+        .logo { font-family: "Bebas Neue"; font-size: 26px; color: var(--cyan); letter-spacing: 3px; }
+        .logo-sub { font-size: 9px; color: var(--t3); letter-spacing: 1px; margin-top: -2px; }
+        .yr-panel { padding: 6px; border-bottom: 1px solid var(--bdr); }
+        .yr-lbl, .nav-lbl { font-size: 10px; color: var(--t3); letter-spacing: 1px; padding: 4px; text-transform: uppercase; font-weight: bold; }
+        .yt, .ni { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: var(--r); cursor: pointer; color: var(--t2); margin-bottom: 2px; transition: 0.15s; text-decoration: none; font-size: 12px; }
+        .yt:hover, .ni:hover { background: var(--bg3); color: var(--t1); }
+        .yt.act { background: rgba(0,212,255,0.1); color: var(--cyan); border: 1px solid rgba(0,212,255,0.2); }
+        .ni.act { background: var(--blue); color: #fff; }
+        .sb-foot { padding: 10px; border-top: 1px solid var(--bdr); margin-top: auto; }
+        .ubadge { display: flex; align-items: center; gap: 8px; padding: 6px; background: var(--bg3); border-radius: var(--r); }
+        .uav { width: 24px; height: 24px; border-radius: 50%; background: var(--blue); display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        
+        /* 카드 및 테이블 */
+        .card { background: var(--bg2); border: 1px solid var(--bdr); border-radius: var(--rl); margin-bottom: 12px; overflow: hidden; }
+        .card-hd { padding: 10px 14px; border-bottom: 1px solid var(--bdr); display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.01); }
+        .card-title { font-size: 13px; font-weight: bold; }
+        .card-bd { padding: 12px; }
+        .tw { overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+        th { background: var(--bg4); color: var(--t2); padding: 8px; font-size: 11px; font-weight: 600; border-bottom: 1px solid var(--bdr); }
+        td { padding: 7px 8px; border-bottom: 1px solid var(--bdr2); font-size: 12px; color: var(--t1); }
+        tr:hover td { background: rgba(26,110,245,0.04); }
+        
+        /* 배지 및 버튼 */
+        .b { display: inline-block; padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: 600; line-height: 1; }
+        .bc { background: rgba(0,212,255,0.12); color: var(--cyan); }
+        .bp { background: rgba(139,92,246,0.15); color: #a78bfa; }
+        .ba { background: rgba(255,171,0,0.15); color: var(--amber); }
+        .br { background: rgba(255,61,61,0.15); color: var(--red); }
+        .btn { padding: 5px 12px; border-radius: var(--r); border: none; cursor: pointer; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; color: #fff; background: var(--bg3); transition: 0.15s; }
+        .btn-p { background: var(--blue); } .btn-p:hover { background: #1555d0; }
+        .btn-s { background: var(--bg4); border: 1px solid var(--bdr); color: var(--t2); } .btn-s:hover { color: var(--t1); }
+        
+        /* 폼 컨트롤 */
+        .fbar { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+        input, select, textarea { background: var(--bg3); border: 1px solid var(--bdr); color: var(--t1); padding: 6px 9px; border-radius: var(--r); font-size: 12px; width: 100%; transition: 0.15s; }
+        input:focus, select:focus { outline: none; border-color: var(--cyan); }
+        .fg { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+        .fgg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        
+        /* 모달 및 오버레이 */
+        .ov { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 15px; }
+        .modal { background: var(--bg2); border: 1px solid var(--bdr); border-radius: var(--rl); width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; }
+        .mhd { padding: 12px 16px; border-bottom: 1px solid var(--bdr); display: flex; align-items: center; justify-content: space-between; }
+        .mbd { padding: 16px; overflow-y: auto; }
+        .mft { padding: 10px 16px; border-top: 1px solid var(--bdr); display: flex; justify-content: flex-end; gap: 6px; }
+        .xb { background: transparent; border: none; color: var(--t2); font-size: 16px; cursor: pointer; }
+        
+        /* 모니터링 영역 */
+        .ch-wrap { height: 180px; width: 100%; position: relative; }
+        .hide { display: none !important; }
+        .mono { font-family: var(--font-mono); }
+    </style>
+</head>
+<body>
+
+    <div id="loginPage" class="login-wrap">
+        <div class="login-card">
+            <div class="logo">QMS v2</div>
+            <div class="logo-sub" style="margin-bottom: 20px;">품질관리 시스템 · 통합 포털</div>
+            <div class="fg"><label class="yr-lbl">권한 데모 계정 선택 선택</label>
+                <select id="loginSelect">
+                    <option value="admin">🔴 최고관리자 (김품질) - 모든 권한</option>
+                    <option value="manager">🟡 담당자 (이생산) - 입력/수정 권한</option>
+                    <option value="viewer">🟢 검측원/열람자 (박영업) - 조회 전용</option>
+                </select>
+            </div>
+            <button id="loginBtn" class="btn btn-p" style="width:100%; justify-content:center; margin-top:10px; padding:8px;">시스템 접속</button>
+        </div>
+    </div>
+
+    <div id="mainPage" class="layout hide">
+        <div class="sidebar">
+            <div class="logo-wrap">
+                <div class="logo">QMS v2</div>
+                <div class="logo-sub">품질관리 대시보드</div>
+            </div>
+            <div class="yr-panel">
+                <div class="yr-lbl">관리 연도 도메인</div>
+                <div class="yt act"><span>2026년 기준</span><span class="b bc">LIVE</span></div>
+            </div>
+            <div class="nav-sec" style="padding: 6px;">
+                <div class="nav-lbl">메뉴 레이어</div>
+                <div class="ni act">📊 부적합 관리 (NCI)</div>
+            </div>
+            <div class="sb-foot">
+                <div class="ubadge">
+                    <div class="uav" id="userInitial">A</div>
+                    <div>
+                        <div id="userName" style="font-weight:bold; font-size:11px;">김품질</div>
+                        <div id="userRole" style="font-size:9px; color:var(--t3)">ADMINISTRATOR</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="topbar">
+                <div style="font-weight:bold; font-size:13px;">품질 관리 센터 <span class="b bc">2026년 통합 모듈</span></div>
+                <div style="font-size:11px; color:var(--green)">● 로컬 전용 가속 런타임 가동 중</div>
+            </div>
+            
+            <div class="content">
+                <div class="card">
+                    <div class="card-hd"><span class="card-title">월별 부적합 추이 분석 (Chart.js 연동)</span></div>
+                    <div class="card-bd"><div class="ch-wrap"><canvas id="qmsChart"></canvas></div></div>
+                </div>
+
+                <div class="fbar">
+                    <input id="searchInp" style="max-width: 220px;" placeholder="🔍 내용 또는 모델명 검색...">
+                    <button id="addNciBtn" class="btn btn-p">+ NCI 신규 등록</button>
+                    <button id="excelBtn" class="btn btn-s">⬇ 엑셀 추출</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-hd"><span class="card-title">NCI & CAR 종합 실적 리스트</span></div>
+                    <div class="tw">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No</th><th>Internal NCR No</th><th>발행일자</th><th>구분</th>
+                                    <th>Part Name (모델)</th><th>부적합 기술 내용</th><th>QTY</th><th>유형</th><th>귀책처</th><th>조치현황</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="nciModal" class="ov hide">
+        <div class="modal">
+            <div class="mhd">
+                <span class="mtitle" style="font-weight:bold;">NCI 부적합 레코드 제어</span>
+                <button class="xb" id="closeModalBtn">✕</button>
+            </div>
+            <div class="mbd">
+                <div class="fgg">
+                    <div class="fg"><label>발행일자 *</label><input type="date" id="formDate" value="2026-05-27"></div>
+                    <div class="fg"><label>Part Name (모델명) *</label><input type="text" id="formPart" placeholder="예: Upper Frame A"></div>
+                </div>
+                <div class="fgg">
+                    <div class="fg"><label>부적합 수량 (QTY)</label><input type="number" id="formQty" value="1"></div>
+                    <div class="fg"><label>부적합 대분류 유형</label>
+                        <select id="formType">
+                            <option value="용접">용접 구조물 결함</option>
+                            <option value="치수">치수 오차 불량</option>
+                            <option value="가공">가공/절단 불량</option>
+                            <option value="도장">도장/피막 결함</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="fg"><label>부적합 원인 및 현상 기술 *</label><textarea id="formDesc" placeholder="검측된 불량 사유 및 세부 스펙을 기술하십시오."></textarea></div>
+                <div class="fgg">
+                    <div class="fg"><label>귀책처 (Caused By)</label><input type="text" id="formCaused" value="생산1팀"></div>
+                    <div class="fg"><label>최종 조치 (Disposition)</label>
+                        <select id="formDisp">
+                            <option value="Owner Rework">Owner Rework (자체 수정)</option>
+                            <option value="Return">Return (반품)</option>
+                            <option value="Discard">Discard (폐기)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="mft">
+                <button class="btn btn-s" id="cancelModalBtn">취소</button>
+                <button class="btn btn-p" id="saveModalBtn">데이터 반영</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 초기 가상 정적 마스터 데이터 도메인
+        let dbData = [
+            { id: 1, seq_no: 1, internal_ncr_no: "NCI-260510-01", issued_date: "2026-05-10", item_category: "fab", part_name: "Upper Frame A", nci_description: "용접 각장 부족 및 슬래그 잔류 발견.", qty: 2, type: "용접", caused_by: "A공장", disposition: "Owner Rework" },
+            { id: 2, seq_no: 2, internal_ncr_no: "NCI-260515-02", issued_date: "2026-05-15", item_category: "fab", part_name: "Base Plate B", nci_description: "취부 치수 도면 대비 +5mm 홀 피치 오차 오차 발생.", qty: 1, type: "치수", caused_by: "제작B팀", disposition: "Return" }
+        ];
+
+        let currentUser = null;
+        let chartInstance = null;
+
+        // DOM 객체 바인딩 캐싱
+        const el = id => document.getElementById(id);
+
+        // 로그인 프로세스
+        el('loginBtn').addEventListener('click', () => {
+            const role = el('loginSelect').value;
+            currentUser = {
+                role: role,
+                name: role === 'admin' ? '김품질' : role === 'manager' ? '이담당' : '박열람',
+                dept: role === 'admin' ? '품질보증팀' : role === 'manager' ? '생산팀' : '영업부'
+            };
+            
+            el('userInitial').innerText = currentUser.name[0];
+            el('userName').innerText = currentUser.name;
+            el('userRole').innerText = currentUser.role.toUpperCase();
+
+            // 권한 제어
+            if(currentUser.role === 'viewer') el('addNciBtn').classList.add('hide');
+            else el('addNciBtn').classList.remove('hide');
+
+            el('loginPage').classList.add('hide');
+            el('mainPage').classList.remove('hide');
+            
+            initSystem();
+        });
+
+        // 시스템 화면 초기화 및 렌더링 순서
+        function initSystem() {
+            renderTable();
+            renderChart();
+        }
+
+        function renderTable() {
+            const tbody = el('tableBody');
+            const q = el('searchInp').value.toLowerCase();
+            tbody.innerHTML = '';
+
+            const filtered = dbData.filter(d => 
+                !q || d.part_name.toLowerCase().includes(q) || d.nci_description.toLowerCase().includes(q)
+            );
+
+            filtered.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${d.seq_no}</td>
+                    <td class="mono">${d.internal_ncr_no}</td>
+                    <td>${d.issued_date}</td>
+                    <td><span class="b bc">제작</span></td>
+                    <td style="font-weight:bold;">${d.part_name}</td>
+                    <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis;">${d.nci_description}</td>
+                    <td class="mono">${d.qty}</td>
+                    <td><span class="b ba">${d.type}</span></td>
+                    <td>${d.caused_by}</td>
+                    <td><span class="b bp">${d.disposition}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Chart.js 인스턴스 마운트
+        function renderChart() {
+            const ctx = el('qmsChart').getContext('2d');
+            const monthlyData = Array(12).fill(0);
+
+            dbData.forEach(d => {
+                const m = parseInt(d.issued_date.split('-')[1]);
+                if(m >= 1 && m <= 12) monthlyData[m-1] += d.qty;
+            });
+
+            if(chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+                    datasets: [{
+                        label: '불량 검측 추이 (수량)',
+                        data: monthlyData,
+                        backgroundColor: 'rgba(0, 212, 255, 0.2)',
+                        borderColor: 'rgba(0, 212, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: '#143050' }, ticks: { color: '#7fb3d3' } },
+                        x: { grid: { display: false }, ticks: { color: '#7fb3d3' } }
+                    }
+                }
+            });
+        }
+
+        // 실시간 클라이언트 검색 이벤트 바인딩
+        el('searchInp').addEventListener('input', renderTable);
+
+        // 모달 온/오프 제어 루프
+        el('addNciBtn').addEventListener('click', () => el('nciModal').classList.remove('hide'));
+        const closeM = () => el('nciModal').classList.add('hide');
+        el('closeModalBtn').addEventListener('click', closeM);
+        el('cancelModalBtn').addEventListener('click', closeM);
+
+        // 데이터 내부 저장 프로세스
+        el('saveModalBtn').addEventListener('click', () => {
+            const date = el('formDate').value;
+            const part = el('formPart').value;
+            const desc = el('formDesc').value;
+            
+            if(!date || !part || !desc) {
+                alert('필수 입력 파라미터가 누락되었습니다.');
+                return;
+            }
+
+            const ncrNo = `NCI-${date.replace(/-/g,'').slice(2,8)}-${String(dbData.length + 1).padStart(2,'0')}`;
+            
+            const newRecord = {
+                id: Date.now(),
+                seq_no: dbData.length + 1,
+                internal_ncr_no: ncrNo,
+                issued_date: date,
+                item_category: "fab",
+                part_name: part,
+                nci_description: desc,
+                qty: parseInt(el('formQty').value) || 1,
+                type: el('formType').value,
+                caused_by: el('formCaused').value,
+                disposition: el('formDisp').value
+            };
+
+            dbData.push(newRecord);
+            closeM();
+            initSystem();
+            
+            // 입력 폼 클리어
+            el('formPart').value = '';
+            el('formDesc').value = '';
+        });
+
+        // Excel 내보내기 런타임 연동
+        el('excelBtn').addEventListener('click', () => {
+            const ws = XLSX.utils.json_to_sheet(dbData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "NCI Report");
+            XLSX.writeFile(wb, `QMS_Quality_Report_2026.xlsx`);
+        });
+    </script>
+</body>
+</html>
